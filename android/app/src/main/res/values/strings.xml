@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">toordoor</string>
+    <string name="app_name">toordor</string>
     <string name="facebook_app_id">570321708333290</string>
-    <string name="facebook_client_token">0db38fa6fc6f09a1ce478ecad2fd8fc5</string>
     <string name="fb_login_protocol_scheme">fb2bed027e73e764b0c7dc468bc8f756e2</string>
+    <string name="facebook_client_token">0db38fa6fc6f09a1ce478ecad2fd8fc5</string>
 
 </resources>

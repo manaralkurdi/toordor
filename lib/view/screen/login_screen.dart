@@ -65,7 +65,34 @@ class _LoginPageState extends State<LoginPage> {
     prefs.setString('StringTranslate', translate);
     prefs.setString('phone', phoneNumber.text.toString());
   }
+  Map<String, dynamic>? _userData;
+  AccessToken? _accessToken;
+  Future<User?> facebookLogin() async {
+    final LoginResult result = await FacebookAuth.instance.login();
+    if (result.status == LoginStatus.success) {
+      _accessToken = result.accessToken;
 
+      final userData = await FacebookAuth.instance.getUserData();
+      _userData = userData;
+      // try {
+      //   final result = (await FacebookAuth.instance.login()).accessToken;
+      //   print('result: $result');
+      //   if (result == null) return null;
+      //   final facebookAuthCredential =
+      //   FacebookAuthProvider.credential(result.token);
+      //   final user =
+      //       (await _auth.signInWithCredential(facebookAuthCredential)).user;
+      //   return user;
+      // } catch (e) {
+      //   print('[FACEBOOK][ERROR: $e]');
+      //   return null;
+      // }
+    }
+    else {
+      print(result.status);
+      print(result.message);
+    }
+  }
   fetch() async {
     prefs = await SharedPreferences.getInstance();
     String translateshared = prefs.getString('StringTranslate') ?? "";
@@ -442,9 +469,9 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           ),
                           InkWell(
-                            onTap: (){
-                            //  _requestPermission();
-                           //   signInWithFacebook();
+                            onTap: ()  {
+                           //  _requestPermission();
+                              facebookLogin();
                               // Navigator.pushReplacement(context,
                               //     MaterialPageRoute(builder: (context) => FacebookApp()));
                             },
@@ -486,8 +513,6 @@ class _LoginPageState extends State<LoginPage> {
   //   }
   // }
 
-  Map<String, dynamic>? _userData;
-  AccessToken? _accessToken;
   bool _checking = true;
   Future<void> _checkIfIsLogged() async {
     final accessToken = await FacebookAuth.instance.accessToken;

@@ -1,9 +1,7 @@
-import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:csc_picker/csc_picker.dart';
+
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,20 +9,19 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:localize_and_translate/localize_and_translate.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sizer/sizer.dart';
+
 import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
 
 import 'package:toordor/controller/controller.dart';
-import 'package:toordor/controller/size.dart';
-import 'package:toordor/model/category.dart';
+
 import 'package:toordor/model/category_model.dart';
-import 'package:toordor/view/Widget/TextForm.dart';
+
 import 'package:toordor/view/screen/home.dart';
-import 'package:toordor/view/screen/home_page.dart';
-import 'package:toordor/view/screen/my_business.dart';
-import 'package:toordor/view/screen/show_bussnise_appointment.dart';
+
 import 'package:toordor/view/widget/constant.dart';
 import 'package:toordor/view/widget/image.dart';
+import 'package:toordor/view/widget/text_field.dart';
+
 
 class AddProject extends StatefulWidget {
   const AddProject({Key? key}) : super(key: key);
@@ -103,8 +100,8 @@ class _AddProjectState extends State<AddProject> {
   int idServices = 0;
   String serviceName = "";
   bool select = false;
-  DateTime _dateTimeTo = DateTime.now();
-  DateTime _dateTimeFrom = DateTime.now();
+  late DateTime _dateTimeTo = DateTime.now();
+  late DateTime _dateTimeFrom = DateTime.now();
   List category_ = [
     "صالون حلاقة رجالي".tr(),
     "صالونات تجميل".tr(),
@@ -161,69 +158,8 @@ class _AddProjectState extends State<AddProject> {
     return TimeOfDay(hour: dateTime.hour, minute: dateTime.minute);
   }
 
-  File imageFile = File('');
-  File? _image;
+  File? imageFile;
   String imagee = "";
-  final picker = ImagePicker();
-  Future<Null> _pickImage(ImageSource source, context) async {
-    final pickedImage = await ImagePicker().getImage(source: source);
-    imageFile = (pickedImage != null ? File(pickedImage.path) : null)!;
-    if (imageFile != null) {
-      //you can set your value
-      setState(() {
-        imageFile = (pickedImage as File?)!;
-        print("print(_image);");
-        final bytes = File(imageFile!.path).readAsBytesSync();
-        String img64 = base64Encode(bytes);
-        print("print(_image);");
-        print(img64);
-        print(imageFile?.path);
-        //state = AppState.picked;
-      });
-    }
-  }
-
-  Future getImage() async {
-    final pickedFile = await picker.getImage(source: ImageSource.gallery);
-    setState(() {
-      if (pickedFile != null) {
-        _image = File(pickedFile.path);
-      } else {
-        print('No image selected.');
-      }
-    });
-  }
-
-  _imageFromCamera() async {
-    final pickedFile = await picker.getImage(source: ImageSource.gallery);
-    setState(() {
-      if (pickedFile != null) {
-        _image = File(pickedFile.path);
-        print("ehrviyerf");
-        print(_image);
-      } else {
-        print('No image selected.');
-      }
-    });
-  }
-
-  //this is a code get image from Gallery
-  _imageFromGallery() async {
-    final pickedImage =
-        await ImagePicker().getImage(source: ImageSource.gallery);
-    imageFile = (pickedImage != null ? File(pickedImage.path) : null)!;
-    if (imageFile != null) {
-      setState(() {
-        imageFile = (pickedImage as File?)!;
-        print("print(_image);");
-        final bytes = File(_image!.path).readAsBytesSync();
-        String img64 = base64Encode(bytes);
-        print("print(_image);");
-        print(img64);
-        print(_image?.path);
-      });
-    }
-  }
 
   _getFromGallery() async {
     PickedFile? pickedFile = await ImagePicker().getImage(
@@ -235,6 +171,8 @@ class _AddProjectState extends State<AddProject> {
       if (pickedFile != null) {
         setState(() {
           imageFile = File(pickedFile.path);
+          print("imageFile!.path");
+          print(imageFile!.path);
           Navigator.of(context).pop();
         });
       }
@@ -278,32 +216,70 @@ class _AddProjectState extends State<AddProject> {
     // print(tempDate);
   }
 
-  var dateFormat = DateFormat("HH:MM");
-  Widget hourMinute12HCustomStyle(DateTime time1, String text) {
-    return Expanded(
-      child: Container(
-        //height:90,
-        color: Colors.white,
-        child: new TimePickerSpinner(
-          is24HourMode: true,
-          normalTextStyle:
-              TextStyle(fontSize: 16, color: ColorCustome.colorblue),
-          highlightedTextStyle:
-              TextStyle(fontSize: 16, color: ColorCustome.coloryellow),
-          spacing: 30,
-          itemHeight: 60,
-          isForce2Digits: true,
-          minutesInterval: 15,
-          onTimeChange: (time) {
-            setState(() {
-              time1 = time;
-              text = dateFormat.format(time1);
-              // you can change the format here
-              // print(dateFormat.format(time1));
-              print(fromText);
-            });
-          },
-        ),
+  late SharedPreferences prefs;
+  save(Text) async {
+    prefs = await SharedPreferences.getInstance();
+    prefs.setString('fromText', Text);
+  }
+
+  fetch(Text) async {
+    prefs = await SharedPreferences.getInstance();
+    Text = prefs.getString('fromText') ?? "";
+    print(fromText);
+  }
+
+  var dateFormat = DateFormat("HH:mm");
+  Widget hourMinute12HCustomStyle(DateTime time1) {
+    return Container(
+      //height:90,
+      color: Colors.white,
+      child: TimePickerSpinner(
+        is24HourMode: true,
+        normalTextStyle: TextStyle(fontSize: 16, color: ColorCustome.colorblue),
+        highlightedTextStyle:
+            TextStyle(fontSize: 16, color: ColorCustome.coloryellow),
+        spacing: 30,
+        itemHeight: 60,
+        minutesInterval: 15,
+        onTimeChange: (time) {
+          setState(() {
+            time1 = time;
+            fromText = dateFormat.format(time1);
+            save(fromText);
+            // you can change the format here
+            // print(dateFormat.format(time1));
+            print("gSAIdyuguiqha");
+            print(fromText);
+          });
+        },
+      ),
+    );
+  }
+
+  Widget hourMinute12HCustomStyle1(DateTime time1) {
+    return Container(
+      //height:90,
+      color: Colors.white,
+      child: TimePickerSpinner(
+        is24HourMode: true,
+        normalTextStyle: TextStyle(fontSize: 16, color: ColorCustome.colorblue),
+        highlightedTextStyle:
+            TextStyle(fontSize: 16, color: ColorCustome.coloryellow),
+        spacing: 30,
+        itemHeight: 60,
+        isForce2Digits: true,
+        minutesInterval: 15,
+        onTimeChange: (time) {
+          setState(() {
+            time1 = time;
+            toText = dateFormat.format(time1);
+            save(toText);
+            // you can change the format here
+            // print(dateFormat.format(time1));
+            print("gSAIdyuguiqha");
+            print(toText);
+          });
+        },
       ),
     );
   }
@@ -396,6 +372,8 @@ class _AddProjectState extends State<AddProject> {
   @override
   Widget build(BuildContext context) {
     Shared();
+    fetch(fromText);
+    fetch(toText);
     print("fromText");
     print(fromText);
     return Mainpage(
@@ -515,33 +493,63 @@ class _AddProjectState extends State<AddProject> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    child: Text(
-                      "معلومات المشروع".tr(),
-                      style: TextStyle(
-                        color: ColorCustome.coloryellow,
-                        fontSize: 15,
-                      ),
-                    ),
-                  ),
+                  // Container(
+                  //   child: Text(
+                  //     "معلومات المشروع".tr(),
+                  //     style: TextStyle(
+                  //       color: ColorCustome.coloryellow,
+                  //       fontSize: 15,
+                  //     ),
+                  //   ),
+                  // ),
                   // displayImage(),
                   InkWell(
                     child: Container(
                       child: Column(
                         children: [
+                          Container(
+                            child: Text("اضافة صورة".tr(),
+                                style: TextStyle(
+                                    fontSize: 15,
+                                    color: ColorCustome.colorblue)),
+                          ),
                           //this is a container that contain image
                           //when user select image from Gallery or Camera
                           Container(
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(80),
+                                border: Border.all(
+                                    color: ColorCustome.coloryellow)),
                             //  margin: EdgeInsets.only(top: 20),
-                            width: 70,
-                            height: 70,
-                            child: imageFile == File('')
-                                ? Image.asset("assets/exit.png",
-                                    width: 70, height: 70)
-                                : Image.file(imageFile, width: 70, height: 70),
-                          ),
-
-                          //this is used to perform uploading task
+                            width: 60,
+                            height: 60,
+                            child: imageFile == null
+                                ? Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Icon(
+                                      Icons.add_a_photo,
+                                      size: 40,
+                                      color: ColorCustome.colorblue,
+                                    ),
+                                  )
+                                : ClipPath(
+                                    clipper: ShapeBorderClipper(
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(20))),
+                                    ),
+                                    child: Container(
+                                        width: 70,
+                                        height: 60,
+                                        child: Image.file(
+                                          imageFile!,
+                                          width: 70,
+                                          height: 60,
+                                          fit: BoxFit.fill,
+                                        )),
+                                  ),
+                            //this is used to perform uploading task
+                          )
                         ],
                       ),
                     ),
@@ -560,24 +568,35 @@ class _AddProjectState extends State<AddProject> {
                       });
                     },
                   ),
-
-                  TextForm(
-                      hint: 'اسم المشروع'.tr(),
-                      controller: projectName,
-                      //   icon: Container(),
-                      keyBoardType: TextInputType.text),
-                  TextForm(
-                      hint: 'رقم الهاتف'.tr(),
-                      //   icon: Container(),
-                      controller: phoneNumber,
-                      keyBoardType: TextInputType.phone),
-                  TextForm(
-                      hint: 'البريد الالكتروني'.tr(),
-                      controller: email,
-                      //               TextForm(hint: 'التخصص'.tr(), controller: specialty)
-                      //   icon: Container(),
-                      keyBoardType: TextInputType.text),
-                  TextForm(
+                  Divider(
+                    color: ColorCustome.colorblue,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: TextFormCustome(
+                        hint: 'اسم المشروع'.tr(),
+                        controller: projectName,
+                        //   icon: Container(),
+                        keyBoardType: TextInputType.text),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: TextFormCustome(
+                        hint: 'رقم الهاتف'.tr(),
+                        //   icon: Container(),
+                        controller: phoneNumber,
+                        keyBoardType: TextInputType.phone),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: TextFormCustome(
+                        hint: 'البريد الالكتروني'.tr(),
+                        controller: email,
+                        //               TextForm(hint: 'التخصص'.tr(), controller: specialty)
+                        //   icon: Container(),
+                        keyBoardType: TextInputType.text),
+                  ),
+                  TextFormCustome(
                       hint: 'التخصص'.tr(),
                       controller: specialty,
                       //   icon: Container(),
@@ -679,7 +698,9 @@ class _AddProjectState extends State<AddProject> {
                                                                 top: 10),
                                                         child: Center(
                                                           child: Text(
-                                                            "من",
+                                                            fromText == ""
+                                                                ? "من".tr()
+                                                                :fromText,
                                                             style: TextStyle(
                                                                 color: Colors
                                                                     .white,
@@ -698,15 +719,54 @@ class _AddProjectState extends State<AddProject> {
                                                           builder: (BuildContext
                                                               context) {
                                                             return AlertDialog(
-                                                              //  title: Text("Alert Dialog"),
                                                               content:
-                                                                  hourMinute12HCustomStyle(
-                                                                      _dateTimeFrom,
-                                                                      fromText),
+                                                                  Container(
+                                                                //height:90,
+                                                                color: Colors
+                                                                    .white,
+                                                                child:
+                                                                    TimePickerSpinner(
+                                                                  is24HourMode:
+                                                                      true,
+                                                                  normalTextStyle: TextStyle(
+                                                                      fontSize:
+                                                                          16,
+                                                                      color: ColorCustome
+                                                                          .colorblue),
+                                                                  highlightedTextStyle: TextStyle(
+                                                                      fontSize:
+                                                                          16,
+                                                                      color: ColorCustome
+                                                                          .coloryellow),
+                                                                  spacing: 30,
+                                                                  itemHeight:
+                                                                      60,
+                                                                  isForce2Digits:
+                                                                      true,
+                                                                  minutesInterval:
+                                                                      15,
+                                                                  onTimeChange:
+                                                                      (time) {
+                                                                    setStateeeee(
+                                                                        () {
+                                                                      _dateTimeFrom = time;
+                                                                      //   fromText = dateFormat.format(_dateTimeFrom);
+                                                                      save(fromText);
+
+                                                                      fromText =DateFormat.jm().format(_dateTimeFrom);// you can change the format here
+
+                                                                      print(
+                                                                          "gSAIdyuguiqha");
+                                                                      print(
+                                                                          fromText);
+                                                                    });
+                                                                  },
+                                                                ),
+                                                              ),
                                                               actions: [
                                                                 TextButton(
                                                                   child: Text(
-                                                                      "Close"),
+                                                                      "حفظ"),
                                                                   onPressed:
                                                                       () {
                                                                     Navigator.of(
@@ -730,7 +790,9 @@ class _AddProjectState extends State<AddProject> {
                                                         child: Container(
                                                           child: Center(
                                                             child: Text(
-                                                              "الى",
+                                                              toText == ""
+                                                                  ? "الى".tr()
+                                                                  : toText,
                                                               style: TextStyle(
                                                                   color: Colors
                                                                       .white,
@@ -750,32 +812,69 @@ class _AddProjectState extends State<AddProject> {
                                                               .colorblue,
                                                         ),
                                                         onTap: () {
-                                                          showDialog(
-                                                            context: context,
-                                                            builder:
-                                                                (BuildContext
-                                                                    context) {
-                                                              return AlertDialog(
-                                                                //  title: Text("Alert Dialog"),
-                                                                content:
-                                                                    hourMinute12HCustomStyle(
-                                                                        _dateTimeTo,
-                                                                        toText),
-                                                                actions: [
-                                                                  TextButton(
-                                                                    child: Text(
-                                                                        "Close"),
-                                                                    onPressed:
-                                                                        () {
-                                                                      Navigator.of(
-                                                                              context)
-                                                                          .pop();
-                                                                    },
-                                                                  )
-                                                                ],
-                                                              );
-                                                            },
-                                                          );
+                                                          setStateeeee(() {
+                                                            showDialog(
+                                                              context: context,
+                                                              builder:
+                                                                  (BuildContext
+                                                                      context) {
+                                                                return AlertDialog(
+                                                                  //  title: Text("Alert Dialog"),
+                                                                  content:
+                                                                      Container(
+                                                                    //height:90,
+                                                                    color: Colors
+                                                                        .white,
+                                                                    child:
+                                                                        TimePickerSpinner(
+
+                                                                      is24HourMode: true,
+                                                                      normalTextStyle: TextStyle(
+                                                                          fontSize:
+                                                                              16,
+                                                                          color:
+                                                                              ColorCustome.colorblue),
+                                                                      highlightedTextStyle: TextStyle(
+                                                                          fontSize:
+                                                                              16,
+                                                                          color:
+                                                                              ColorCustome.coloryellow),
+
+                                                                      spacing:
+                                                                          30,
+                                                                      itemHeight:
+                                                                          60,
+                                                                      // isForce2Digits: true,
+                                                                      minutesInterval:
+                                                                          15,
+                                                                      onTimeChange:
+                                                                          (time) {
+                                                                        setStateeeee(
+                                                                            () {
+                                                                          _dateTimeTo = time;
+                                                                        toText=  DateFormat.jm().format(_dateTimeTo);
+                                                                          print("jDFG7qtw");
+                                                                          print(toText); // you can change the format here; // you can change the format here
+
+                                                                        });
+                                                                      },
+                                                                    ),
+                                                                  ),
+                                                                  actions: [
+                                                                    TextButton(
+                                                                      child: Text(
+                                                                          "حفظ"),
+                                                                      onPressed:
+                                                                          () {
+                                                                        Navigator.of(context)
+                                                                            .pop();
+                                                                      },
+                                                                    )
+                                                                  ],
+                                                                );
+                                                              },
+                                                            );
+                                                          });
                                                         },
                                                       ),
                                                     ),
@@ -912,20 +1011,18 @@ class _AddProjectState extends State<AddProject> {
                                 },
                               );
                             },
-                            child: Expanded(
-                              child: Container(
-                                padding: const EdgeInsets.only(
-                                    left: 20.0, right: 20, top: 5, bottom: 5),
-                                decoration: BoxDecoration(
-                                    border: Border.all(
-                                        color: ColorCustome.colorblue)),
-                                child: Center(
-                                  child: Text(
-                                    "اوقات العمل",
-                                    style: TextStyle(
-                                      color: ColorCustome.coloryellow,
-                                      fontSize: 15,
-                                    ),
+                            child: Container(
+                              padding: const EdgeInsets.only(
+                                  left: 20.0, right: 20, top: 5, bottom: 5),
+                              decoration: BoxDecoration(
+                                  border: Border.all(
+                                      color: ColorCustome.colorblue)),
+                              child: Center(
+                                child: Text(
+                                  "اوقات العمل",
+                                  style: TextStyle(
+                                    color: ColorCustome.coloryellow,
+                                    fontSize: 15,
                                   ),
                                 ),
                               ),
@@ -963,413 +1060,462 @@ class _AddProjectState extends State<AddProject> {
                             ),
                           ),
                           onTap: () {
-                            showModalBottomSheet(
-                              shape: RoundedRectangleBorder(
-                                // <-- for border radius
-                                borderRadius: BorderRadius.vertical(
-                                    top: Radius.circular(30.0)),
-                              ),
+                            print(fromText);
+                            print(toText);
+                            if (email.text.isEmpty ||
+                                projectName.text.isEmpty ||
+                                phoneNumber.text.isEmpty ||
+                                fromText.isEmpty ||
+                                toText.isEmpty ||
+                                weekdays.isEmpty) {
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(SnackBar(
+                                content: Text(
+                                  ' الرجاء كتابة كافة المعلومات'.tr(),
+                                  style: TextStyle(fontSize: 14),
+                                ),
+                                backgroundColor: ColorCustome.colorblue,
+                              ));
+                            } else {
+                              showModalBottomSheet(
+                                shape: RoundedRectangleBorder(
+                                  // <-- for border radius
+                                  borderRadius: BorderRadius.vertical(
+                                      top: Radius.circular(30.0)),
+                                ),
+                                // isScrollControlled: true,
+                                context: context,
+                                builder: (context) {
+                                  return StatefulBuilder(builder:
+                                      (BuildContext context,
+                                          StateSetter setStateeeee) {
+                                    return ClipRRect(
+                                      borderRadius: const BorderRadius.only(
+                                          topLeft: Radius.circular(29.0),
+                                          topRight: Radius.circular(29.0)),
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          border: Border(
+                                            top: BorderSide(
+                                              color: ColorCustome.colorblue,
+                                              width: 6,
+                                            ),
+                                          ),
+                                        ),
 
-                              // isScrollControlled: true,
-                              context: context,
-                              builder: (context) {
-                                return StatefulBuilder(builder:
-                                    (BuildContext context,
-                                        StateSetter setStateeeee) {
-                                  return ClipRRect(
-                                    borderRadius: const BorderRadius.only(
-                                        topLeft: Radius.circular(29.0),
-                                        topRight: Radius.circular(29.0)),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        border: Border(
-                                          top: BorderSide(
-                                            color: ColorCustome.colorblue,
-                                            width: 6,
+                                        // color: Colors.white,
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(
+                                              left: 20.0, right: 20, top: 13),
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Container(
+                                                    child: Text(
+                                                      "انشاء المشروع".tr(),
+                                                      style: TextStyle(
+                                                          fontSize: 14,
+                                                          color: Colors.black,
+                                                          fontWeight:
+                                                              FontWeight.bold),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              Divider(
+                                                color: ColorCustome.colorblue,
+                                              ),
+                                              Container(
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.start,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              left: 8.0),
+                                                      child: Text("الفئة".tr()),
+                                                    ),
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              left: 8.0),
+                                                      child: Text(":"),
+                                                    ),
+                                                    Text(services.toString()),
+                                                  ],
+                                                ),
+                                              ),
+                                              Divider(
+                                                color: ColorCustome.colorblue,
+                                              ),
+                                              Container(
+                                                child: Text(
+                                                  "معلومات المشروع".tr(),
+                                                  style: TextStyle(
+                                                      fontSize: 14,
+                                                      color: Colors.black,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                              ),
+                                              Container(
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.start,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              left: 8.0),
+                                                      child: Text(
+                                                        'اسم المشروع'.tr(),
+                                                        style: TextStyle(
+                                                            fontSize: 13,
+                                                            color:
+                                                                Colors.black),
+                                                      ),
+                                                    ),
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              left: 8.0),
+                                                      child: Text(":"),
+                                                    ),
+                                                    Text(
+                                                      projectName.text
+                                                          .toString(),
+                                                      style: TextStyle(
+                                                          fontSize: 13,
+                                                          color: ColorCustome
+                                                              .colorblue),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              Container(
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.start,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              left: 8.0),
+                                                      child: Text(
+                                                        'رقم الهاتف'.tr(),
+                                                        style: TextStyle(
+                                                            fontSize: 13,
+                                                            color:
+                                                                Colors.black),
+                                                      ),
+                                                    ),
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              left: 8.0),
+                                                      child: Text(":"),
+                                                    ),
+                                                    Text(
+                                                      phoneNumber.text
+                                                          .toString(),
+                                                      style: TextStyle(
+                                                          fontSize: 13,
+                                                          color: ColorCustome
+                                                              .colorblue),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              Container(
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.start,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              left: 8.0),
+                                                      child: Text(
+                                                        'التخصص'.tr(),
+                                                        style: TextStyle(
+                                                            fontSize: 13,
+                                                            color:
+                                                                Colors.black),
+                                                      ),
+                                                    ),
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              left: 8.0),
+                                                      child: Text(":"),
+                                                    ),
+                                                    Text(
+                                                      specialty.text.toString(),
+                                                      style: TextStyle(
+                                                          fontSize: 13,
+                                                          color: ColorCustome
+                                                              .colorblue),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              Container(
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.start,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              left: 8.0),
+                                                      child: Text(
+                                                        'البريد الالكتروني'
+                                                            .tr(),
+                                                        style: TextStyle(
+                                                            fontSize: 13,
+                                                            color:
+                                                                Colors.black),
+                                                      ),
+                                                    ),
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              left: 8.0),
+                                                      child: Text(":"),
+                                                    ),
+                                                    Text(
+                                                      email.text.toString(),
+                                                      style: TextStyle(
+                                                          fontSize: 13,
+                                                          color: ColorCustome
+                                                              .colorblue),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              Divider(
+                                                color: ColorCustome.colorblue,
+                                              ),
+                                              Container(
+                                                child: Text(
+                                                  "الوقت".tr(),
+                                                  style: TextStyle(
+                                                      fontSize: 14,
+                                                      color: Colors.black,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                              ),
+                                              Container(
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.start,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              left: 8.0),
+                                                      child: Text(
+                                                        'من'.tr(),
+                                                        style: TextStyle(
+                                                            fontSize: 13,
+                                                            color:
+                                                                Colors.black),
+                                                      ),
+                                                    ),
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              left: 8.0),
+                                                      child: Text(":"),
+                                                    ),
+                                                    Text(
+                                                      fromText.toString(),
+                                                      style: TextStyle(
+                                                          fontSize: 13,
+                                                          color: ColorCustome
+                                                              .colorblue),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              Container(
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.start,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              left: 8.0),
+                                                      child: Text(
+                                                        'الى'.tr(),
+                                                        style: TextStyle(
+                                                            fontSize: 13,
+                                                            color:
+                                                                Colors.black),
+                                                      ),
+                                                    ),
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              left: 8.0),
+                                                      child: Text(":"),
+                                                    ),
+                                                    Text(
+                                                      toText.toString(),
+                                                      style: TextStyle(
+                                                          fontSize: 13,
+                                                          color: ColorCustome
+                                                              .colorblue),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              Divider(
+                                                color: ColorCustome.colorblue,
+                                              ),
+                                              Container(
+                                                child: Text(
+                                                  'أيام العطلة'.tr(),
+                                                  style: TextStyle(
+                                                      fontSize: 14,
+                                                      color: Colors.black,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                              ),
+                                              Divider(
+                                                color: ColorCustome.colorblue,
+                                              ),
+                                              Container(
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.start,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      weekdays_selectuser
+                                                          .toString(),
+                                                      style: TextStyle(
+                                                          fontSize: 13,
+                                                          color: ColorCustome
+                                                              .colorblue),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              InkWell(
+                                                child: Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          top: 20.0,
+                                                          bottom: 20),
+                                                  child: Container(
+                                                    width: 90,
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                      left: 20.0,
+                                                      right: 20,
+                                                    ),
+                                                    decoration: BoxDecoration(
+                                                        color: ColorCustome
+                                                            .colorblue,
+                                                        border: Border.all(
+                                                            color: ColorCustome
+                                                                .colorblue)),
+                                                    child: Center(
+                                                      child: Text(
+                                                        "حفظ",
+                                                        style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 15,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                onTap: () {
+                                                  print(fromText);
+                                                  print(toText);
+                                                  if (email.text.isEmpty ||
+                                                      projectName
+                                                          .text.isEmpty ||
+                                                      phoneNumber
+                                                          .text.isEmpty ||
+                                                      fromText.isEmpty ||
+                                                      toText.isEmpty ||
+                                                      weekdays.isEmpty) {
+                                                    ScaffoldMessenger.of(
+                                                            context)
+                                                        .showSnackBar(SnackBar(
+                                                      content: Text(
+                                                          ' الرجاء كتابة كافة المعلومات'
+                                                              .tr()),
+                                                      backgroundColor:
+                                                          Colors.green,
+                                                    ));
+                                                  } else {
+                                                    controller.insertBusiness(
+                                                      context,
+                                                      city: "",
+                                                      country: "",
+                                                      email: email.text,
+                                                      nameProject:
+                                                          projectName.text,
+                                                      phoneNumber:
+                                                          phoneNumber.text,
+                                                      specialization:
+                                                          specialty.text,
+                                                      fromt: fromText,
+                                                      id: idServices,
+                                                      tot: toText,
+                                                      weekend:
+                                                          weekdays_selectuser
+                                                              .toString(),
+                                                      image:imageFile!.path
+                                                    );
+                                                    // ScaffoldMessenger.of(context).showSnackBar( SnackBar(
+                                                    //     content: Text(' تمت الاضافة بنجاح  '.tr())));
+                                                    // Controller.navigatorGo(context, ShowBussniseAppointment());
+                                                  }
+                                                  ;
+                                                },
+                                              ),
+                                            ],
                                           ),
                                         ),
                                       ),
-
-                                      // color: Colors.white,
-                                      height: 300,
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(20.0),
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            Container(
-                                              child: Text(
-                                                "انشاء المشروع".tr(),
-                                                style: TextStyle(
-                                                    fontSize: 16,
-                                                    color: Colors.black,
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
-                                            ),
-                                            Divider(
-                                              color: ColorCustome.colorblue,
-                                            ),
-                                            Container(
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.start,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            left: 8.0),
-                                                    child: Text("الفئة".tr()),
-                                                  ),
-                                                  Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            left: 8.0),
-                                                    child: Text(":"),
-                                                  ),
-                                                  Text(services.toString()),
-                                                ],
-                                              ),
-                                            ),
-                                            Divider(
-                                              color: ColorCustome.colorblue,
-                                            ),
-                                            Container(
-                                              child: Text(
-                                                "معلومات المشروع".tr(),
-                                                style: TextStyle(
-                                                    fontSize: 16,
-                                                    color: Colors.black,
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
-                                            ),
-                                            Container(
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.start,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            left: 8.0),
-                                                    child: Text(
-                                                      'اسم المشروع'.tr(),
-                                                      style: TextStyle(
-                                                          fontSize: 13,
-                                                          color: Colors.black),
-                                                    ),
-                                                  ),
-                                                  Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            left: 8.0),
-                                                    child: Text(":"),
-                                                  ),
-                                                  Text(
-                                                    projectName.text.toString(),
-                                                    style: TextStyle(
-                                                        fontSize: 13,
-                                                        color: ColorCustome
-                                                            .colorblue),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            Container(
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.start,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            left: 8.0),
-                                                    child: Text(
-                                                      'رقم الهاتف'.tr(),
-                                                      style: TextStyle(
-                                                          fontSize: 13,
-                                                          color: Colors.black),
-                                                    ),
-                                                  ),
-                                                  Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            left: 8.0),
-                                                    child: Text(":"),
-                                                  ),
-                                                  Text(
-                                                    phoneNumber.text.toString(),
-                                                    style: TextStyle(
-                                                        fontSize: 13,
-                                                        color: ColorCustome
-                                                            .colorblue),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            Container(
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.start,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            left: 8.0),
-                                                    child: Text(
-                                                      'التخصص'.tr(),
-                                                      style: TextStyle(
-                                                          fontSize: 13,
-                                                          color: Colors.black),
-                                                    ),
-                                                  ),
-                                                  Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            left: 8.0),
-                                                    child: Text(":"),
-                                                  ),
-                                                  Text(
-                                                    specialty.text.toString(),
-                                                    style: TextStyle(
-                                                        fontSize: 13,
-                                                        color: ColorCustome
-                                                            .colorblue),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            Container(
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.start,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            left: 8.0),
-                                                    child: Text(
-                                                      'البريد الالكتروني'.tr(),
-                                                      style: TextStyle(
-                                                          fontSize: 13,
-                                                          color: Colors.black),
-                                                    ),
-                                                  ),
-                                                  Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            left: 8.0),
-                                                    child: Text(":"),
-                                                  ),
-                                                  Text(
-                                                    email.text.toString(),
-                                                    style: TextStyle(
-                                                        fontSize: 13,
-                                                        color: ColorCustome
-                                                            .colorblue),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            Divider(
-                                              color: ColorCustome.colorblue,
-                                            ),
-                                            Container(
-                                              child: Text(
-                                                "الوقت".tr(),
-                                                style: TextStyle(
-                                                    fontSize: 16,
-                                                    color: Colors.black,
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
-                                            ),
-                                            Container(
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.start,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            left: 8.0),
-                                                    child: Text(
-                                                      'من'.tr(),
-                                                      style: TextStyle(
-                                                          fontSize: 13,
-                                                          color: Colors.black),
-                                                    ),
-                                                  ),
-                                                  Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            left: 8.0),
-                                                    child: Text(":"),
-                                                  ),
-                                                  Text(
-                                                    fromText.toString(),
-                                                    style: TextStyle(
-                                                        fontSize: 13,
-                                                        color: ColorCustome
-                                                            .colorblue),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            Container(
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.start,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            left: 8.0),
-                                                    child: Text(
-                                                      'الى'.tr(),
-                                                      style: TextStyle(
-                                                          fontSize: 13,
-                                                          color: Colors.black),
-                                                    ),
-                                                  ),
-                                                  Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            left: 8.0),
-                                                    child: Text(":"),
-                                                  ),
-                                                  Text(
-                                                    toText.toString(),
-                                                    style: TextStyle(
-                                                        fontSize: 13,
-                                                        color: ColorCustome
-                                                            .colorblue),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            Divider(
-                                              color: ColorCustome.colorblue,
-                                            ),
-                                            Container(
-                                              child: Text(
-                                                'ايام العطلة'.tr(),
-                                                style: TextStyle(
-                                                    fontSize: 16,
-                                                    color: Colors.black,
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
-                                            ),
-                                            Container(
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.start,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    weekdays_selectuser
-                                                        .toString(),
-                                                    style: TextStyle(
-                                                        fontSize: 13,
-                                                        color: ColorCustome
-                                                            .colorblue),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            InkWell(
-                                              child: Container(
-                                                width: 90,
-                                                padding: const EdgeInsets.only(
-                                                  left: 20.0,
-                                                  right: 20,
-                                                ),
-                                                decoration: BoxDecoration(
-                                                    color:
-                                                        ColorCustome.colorblue,
-                                                    border: Border.all(
-                                                        color: ColorCustome
-                                                            .colorblue)),
-                                                child: Center(
-                                                  child: Text(
-                                                    "حفظ",
-                                                    style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 15,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                              onTap: () {
-                                                print(fromText);
-                                                print(toText);
-                                                if (email.text.isEmpty ||
-                                                    projectName.text.isEmpty ||
-                                                    phoneNumber.text.isEmpty ||
-                                                    fromText.isEmpty ||
-                                                    toText.isEmpty ||
-                                                    weekdays.isEmpty) {
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(SnackBar(
-                                                    content: Text(
-                                                        ' الرجاء كتابة كافة المعلومات'
-                                                            .tr()),
-                                                    backgroundColor:
-                                                        Colors.green,
-                                                  ));
-                                                } else {
-                                                  controller.insertBusiness(
-                                                    context,
-                                                    city: "",
-                                                    country: "",
-                                                    email: email.text,
-                                                    nameProject:
-                                                        projectName.text,
-                                                    phoneNumber:
-                                                        phoneNumber.text,
-                                                    specialization:
-                                                        specialty.text,
-                                                    fromt: fromText,
-                                                    id: idServices,
-                                                    tot: toText,
-                                                    weekend: weekdays_selectuser
-                                                        .toString(),
-                                                  );
-                                                  // ScaffoldMessenger.of(context).showSnackBar( SnackBar(
-                                                  //     content: Text(' تمت الاضافة بنجاح  '.tr())));
-                                                  // Controller.navigatorGo(context, ShowBussniseAppointment());
-                                                }
-                                                ;
-                                              },
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                });
-                              },
-                            );
+                                    );
+                                  });
+                                },
+                              );
+                              // ScaffoldMessenger.of(context).showSnackBar( SnackBar(
+                              //     content: Text(' تمت الاضافة بنجاح  '.tr())));
+                              // Controller.navigatorGo(context, ShowBussniseAppointment());
+                            }
+                            ;
                           },
                         ),
                       ],

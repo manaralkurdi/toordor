@@ -3,6 +3,7 @@ import 'dart:core';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/file.dart';
 import 'package:localize_and_translate/localize_and_translate.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
@@ -900,6 +901,7 @@ class Controller {
       required String fromt,
       required String tot,
       required int id,
+        required dynamic image,
       required String weekend}) async {
     String _token = await SharedPreferences.getInstance()
         .then((value) => value.getString('token') ?? '');
@@ -924,7 +926,8 @@ class Controller {
           "to_date": tot,
           "country_id": country,
           "city_id": 2,
-          "category_id": id
+          "category_id": id,
+          "image":image
         }));
     print(response.body);
     print(fromt);

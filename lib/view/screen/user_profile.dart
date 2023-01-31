@@ -1,20 +1,17 @@
+import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_cache_manager/file.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:localize_and_translate/localize_and_translate.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
-import 'package:toordor/Controller/size.dart';
+import 'package:toordor/View/Screen/home.dart';
 import 'package:toordor/View/Widget/TextForm.dart';
-import 'package:toordor/view/block/cubit/home_cubit.dart';
-import 'package:toordor/view/block/state/home_state.dart';
+
 import 'package:toordor/view/screen/home_body_category.dart';
 import 'package:toordor/view/screen/home_page.dart';
-import 'dart:io';
 
+import 'package:image_picker/image_picker.dart';
 import '../../Controller/controller.dart';
 
 class UserProFile extends StatefulWidget {
@@ -39,6 +36,74 @@ class _UserProFileState extends State<UserProFile> {
       });
     }
     if (!mounted) return;
+  }
+  Future<void> showOptionsDialog(BuildContext context) {
+    return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return StatefulBuilder(
+              builder: (BuildContext context, StateSetter setStateeeee) {
+                return AlertDialog(
+                  title: Text("Options"),
+                  content: SingleChildScrollView(
+                    child: ListBody(
+                      children: [
+                        GestureDetector(
+                          child: Text("Capture Image From Camera"),
+                          onTap: () {
+                            setStateeeee(() {
+                              _getFromCamera();
+                              // _upload(imageFile);
+                            });
+                          },
+                        ),
+                        Padding(padding: EdgeInsets.all(10)),
+                        GestureDetector(
+                          child: Text("Take Image From Gallery"),
+                          onTap: () {
+                            setStateeeee(() {
+                              _getFromGallery();
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              });
+        });
+  }
+  File? imageFile;
+  _getFromGallery() async {
+    PickedFile? pickedFile = await ImagePicker().getImage(
+      source: ImageSource.gallery,
+      maxWidth: 1800,
+      maxHeight: 1800,
+    );
+    if (pickedFile != null) {
+      if (pickedFile != null) {
+        setState(() {
+          imageFile = File(pickedFile.path);
+          print("imageFile!.path");
+          print(imageFile!.path);
+          Navigator.of(context).pop();
+        });
+      }
+    }
+  }
+
+  _getFromCamera() async {
+    PickedFile ? pickedFile = await ImagePicker().getImage(
+      source: ImageSource.camera,
+      maxWidth: 1800,
+      maxHeight: 1800,
+    );
+    if (pickedFile != null) {
+      setState(() {
+        imageFile = File(pickedFile.path);
+        Navigator.of(context).pop();
+      });
+    }
   }
   TextEditingController message = new TextEditingController();
   Future<void> initConnectivity() async {
@@ -117,27 +182,18 @@ class _UserProFileState extends State<UserProFile> {
   }
   @override
   Widget build(BuildContext context) {
-
-    return  Scaffold(
-      appBar:AppBar2(context:context),
-      body: BlocConsumer<HomeCubit, HomeState>(
-          listener: (context, state) {
-            // TODO: implement listener
-          },
-          builder: (context, state) {
-           // var cubit = HomeCubit.get(context);
-            return RefreshIndicator(
-                  onRefresh: () async {
-                    await Controller.userData(context);
-                  },
-                  child:  FutureBuilder<dynamic>(
-                      future: Controller.userData(context),
-                      builder: (context, snapshot) {
-                       // context.read<HomeCubit>().getLocation();
-                          return SingleChildScrollView(
-                            child: Column(
-                              children: [
-                                Positioned(
+return Mainpage(child: Container(
+  child: FutureBuilder<dynamic>(
+                future: Controller.userData(context),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Row(
+                          children: [
+                            Positioned(
                                 top: 140,
                                 right: 0,
                                 left: 0,
@@ -150,20 +206,28 @@ class _UserProFileState extends State<UserProFile> {
                                     children: [
                                       ClipRRect(
                                         borderRadius: BorderRadius.circular(100),
-                                        child: Image.asset(
-                                          'assets/images/tutorial_1_bg.png',
-                                          height: 200.0,
-                                          width: 200.0,
+                                        child:imageFile==null?Image.network(
+                                          snapshot.data["message"]['photo'],
+                                          height: 70.0,
+                                          width: 100.0,
                                           fit: BoxFit.fill,
-                                        ),
+                                        ):Container(
+                                            width: 70,
+                                            height: 60,
+                                            child: Image.file(
+                                              imageFile!,
+                                              width: 70,
+                                              height: 60,
+                                              fit: BoxFit.fill,
+                                            )),
                                       ),
                                       Positioned(
-                                          bottom: -5,
+                                          bottom: -9,
                                           left: 0,
                                           right: -50,
                                           child: RawMaterialButton(
                                             onPressed: () {
-                                              uploadProfileImage();
+                                              showOptionsDialog(context);
                                               setState(() {
                                                 isUploadImage = true;
                                               });
@@ -172,136 +236,207 @@ class _UserProFileState extends State<UserProFile> {
                                             fillColor: const Color(0xFFF5F6F9),
                                             padding: const EdgeInsets.all(5.0),
                                             shape: const CircleBorder(),
-                                            child: const Icon(Icons.camera_alt_outlined, color: Colors.blue,),
+                                            child: const Icon(
+                                              Icons.camera_alt_outlined,
+                                              color: Colors.blue,),
                                           )
                                       ),
                                     ],
                                   ),
                                 )
                             ),
-                                Material(
-                                  child: Wrap(
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 10.0, vertical: 20),
-                                        child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              mainAxisAlignment: MainAxisAlignment.start,
-                                              children: [
-                                                // Padding(
-                                                //   padding: EdgeInsets.only(left: 13.0.sp),
-                                                //   child: CircleAvatar(
-                                                //     backgroundColor: Colors.grey,
-                                                //     child: const Text(""),
-                                                //     radius: 30.sp,
-                                                //   ),
-                                                // ),
-                                                Text(
-                                                  snapshot.data?['message']['fullname'] ??
-                                                      "",
-                                                  style: const TextStyle(
-                                                      fontSize: 15,
-                                                      color: Colors.black,
-                                                      fontWeight: FontWeight.w700),
-                                                )
-                                              ],
-                                            ),
-                                            SizedBox(height: MySize.height(context) / 20),
-                                            UserDataForm(
-                                              title: 'الاسم بالكامل'.tr(),
-                                              userData:
-                                              snapshot.data?['message']['fullname'] ?? "",
-                                            ),
-                                            UserDataForm(
-                                              title: 'رقم الهاتف'.tr(),
-                                              userData:
-                                              snapshot.data?['message']['phone'] ?? "",
-                                            ),
-                                            UserDataForm(
-                                                title: 'اسم المستخدم:'.tr(),
-                                                userData: snapshot.data?['message']
-                                                ['email']),
-                                            // UserDataForm(
-                                            //   title: 'المدينة'.tr(),
-                                            //   userData: cubit.address ?? "",
-                                            // ),
-                                            // UserDataForm(
-                                            //   title: 'الدولة'.tr(),
-                                            //   userData: cubit.address2 ?? "",
-                                            // ),
-                                            SizedBox(height: MySize.height(context) / 20),
-                                            Padding(
-                                              padding: const EdgeInsets.all(8),
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                MainAxisAlignment.spaceAround,
-                                                children: [
-                                                  // ElevatedButton(
-                                                  //     onPressed: () {},
-                                                  //     child:  Text('حفظ'.tr())),
-                                                  ElevatedButton(
-                                                      onPressed: () {
-                                  print("--------------------------");
-                        Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => EditUserData(
-                        fullName: snapshot
-                                    .data?['message']['fullname'],
-                        phone: snapshot
-                                    .data?['message']
-                        ['phone'],
-                        email: snapshot
-                                    .data?['message']['username'],
-                        country: snapshot.data?['message']['country_id'],
-                        city: snapshot.data?['message']
-                        ['city_id'],
-                        )),);
-                        },
-
-                                                      child: Text('تعديل'.tr())),
-                                                  ElevatedButton(
-                                                    onPressed: () {
-                                                      Controller.navigatorOff(
-                                                          context, HomeBodyCategory());
-                                                    },
-                                                    child: Text('الغاء'.tr()),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            InkWell(
-                                              onTap: (){
-                                                showAlertDialog(context);
-                                              },
-                                                child: Row(
-                                                  children: [
-                                                    Container(
-                                                        decoration:BoxDecoration(
-                                                            border: Border.all(
-                                                            ),
-                                                            color: Colors.grey
-                                                        ),
-                                                        child: Text("حذف الحساب".tr())),
-                                                  ],
-                                                ))
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        }
-      ),
-                );
-
-
-          }),
-    );
+                          ],
+                        ),
+                      ],
+                    );
+                  }
+                  return Container();
+                }),
+), childfloat: Container());
+    // return  Scaffold(
+    //   appBar:AppBar2(context:context),
+    //   body: BlocConsumer<HomeCubit, HomeState>(
+    //       listener: (context, state) {
+    //         // TODO: implement listener
+    //       },
+    //       builder: (context, state) {
+    //        // var cubit = HomeCubit.get(context);
+    //         return RefreshIndicator(
+    //               onRefresh: () async {
+    //                 await Controller.userData(context);
+    //               },
+    //               child:  FutureBuilder<dynamic>(
+    //                   future: Controller.userData(context),
+    //                   builder: (context, snapshot) {
+    //                    // context.read<HomeCubit>().getLocation();
+    //                       return SingleChildScrollView(
+    //                         child: Column(
+    //                           children: [
+    //                             Positioned(
+    //                             top: 140,
+    //                             right: 0,
+    //                             left: 0,
+    //                             child: SizedBox(
+    //                               height: 100,
+    //                               width: 100,
+    //                               child: Stack(
+    //                                 clipBehavior: Clip.none,
+    //                                 fit: StackFit.expand,
+    //                                 children: [
+    //                                   ClipRRect(
+    //                                     borderRadius: BorderRadius.circular(100),
+    //                                     child: Image.network(
+    //                                       snapshot.data["message"]['photo'],
+    //                                       height: 70.0,
+    //                                       width: 100.0,
+    //                                       fit: BoxFit.fill,
+    //                                     ),
+    //                                   ),
+    //                                   Positioned(
+    //                                       bottom: -9,
+    //                                       left: 0,
+    //                                       right: -50,
+    //                                       child: RawMaterialButton(
+    //                                         onPressed: () {
+    //                                           uploadProfileImage();
+    //                                           setState(() {
+    //                                             isUploadImage = true;
+    //                                           });
+    //                                         },
+    //                                         elevation: 2.0,
+    //                                         fillColor: const Color(0xFFF5F6F9),
+    //                                         padding: const EdgeInsets.all(5.0),
+    //                                         shape: const CircleBorder(),
+    //                                         child: const Icon(Icons.camera_alt_outlined, color: Colors.blue,),
+    //                                       )
+    //                                   ),
+    //                                 ],
+    //                               ),
+    //                             )
+    //                         ),
+    //                             Material(
+    //                               child: Wrap(
+    //                                 children: [
+    //                                   Padding(
+    //                                     padding: const EdgeInsets.symmetric(
+    //                                         horizontal: 10.0, vertical: 20),
+    //                                     child: Column(
+    //                                       mainAxisAlignment: MainAxisAlignment.start,
+    //                                       children: [
+    //                                         Row(
+    //                                           mainAxisAlignment: MainAxisAlignment.start,
+    //                                           children: [
+    //                                             // Padding(
+    //                                             //   padding: EdgeInsets.only(left: 13.0.sp),
+    //                                             //   child: CircleAvatar(
+    //                                             //     backgroundColor: Colors.grey,
+    //                                             //     child: const Text(""),
+    //                                             //     radius: 30.sp,
+    //                                             //   ),
+    //                                             // ),
+    //                                             Text(
+    //                                               snapshot.data?['message']['fullname'] ??
+    //                                                   "",
+    //                                               style: const TextStyle(
+    //                                                   fontSize: 15,
+    //                                                   color: Colors.black,
+    //                                                   fontWeight: FontWeight.w700),
+    //                                             )
+    //                                           ],
+    //                                         ),
+    //                                         SizedBox(height: MySize.height(context) / 20),
+    //                                         UserDataForm(
+    //                                           title: 'الاسم بالكامل'.tr(),
+    //                                           userData:
+    //                                           snapshot.data?['message']['fullname'] ?? "",
+    //                                         ),
+    //                                         UserDataForm(
+    //                                           title: 'رقم الهاتف'.tr(),
+    //                                           userData:
+    //                                           snapshot.data?['message']['phone'] ?? "",
+    //                                         ),
+    //                                         UserDataForm(
+    //                                             title: 'اسم المستخدم:'.tr(),
+    //                                             userData: snapshot.data?['message']
+    //                                             ['email']),
+    //                                         // UserDataForm(
+    //                                         //   title: 'المدينة'.tr(),
+    //                                         //   userData: cubit.address ?? "",
+    //                                         // ),
+    //                                         // UserDataForm(
+    //                                         //   title: 'الدولة'.tr(),
+    //                                         //   userData: cubit.address2 ?? "",
+    //                                         // ),
+    //                                         SizedBox(height: MySize.height(context) / 20),
+    //                                         Padding(
+    //                                           padding: const EdgeInsets.all(8),
+    //                                           child: Row(
+    //                                             mainAxisAlignment:
+    //                                             MainAxisAlignment.spaceAround,
+    //                                             children: [
+    //                                               // ElevatedButton(
+    //                                               //     onPressed: () {},
+    //                                               //     child:  Text('حفظ'.tr())),
+    //                                               ElevatedButton(
+    //                                                   onPressed: () {
+    //                               print("--------------------------");
+    //                     Navigator.push(context,
+    //                     MaterialPageRoute(builder: (context) => EditUserData(
+    //                     fullName: snapshot
+    //                                 .data?['message']['fullname'],
+    //                     phone: snapshot
+    //                                 .data?['message']
+    //                     ['phone'],
+    //                     email: snapshot
+    //                                 .data?['message']['username'],
+    //                     country: snapshot.data?['message']['country_id'],
+    //                     city: snapshot.data?['message']
+    //                     ['city_id'],
+    //                     )),);
+    //                     },
+    //
+    //                                                   child: Text('تعديل'.tr())),
+    //                                               ElevatedButton(
+    //                                                 onPressed: () {
+    //                                                   Controller.navigatorOff(
+    //                                                       context, HomeBodyCategory());
+    //                                                 },
+    //                                                 child: Text('الغاء'.tr()),
+    //                                               ),
+    //                                             ],
+    //                                           ),
+    //                                         ),
+    //                                         InkWell(
+    //                                           onTap: (){
+    //                                             showAlertDialog(context);
+    //                                           },
+    //                                             child: Row(
+    //                                               children: [
+    //                                                 Container(
+    //                                                     decoration:BoxDecoration(
+    //                                                         border: Border.all(
+    //                                                         ),
+    //                                                         color: Colors.grey
+    //                                                     ),
+    //                                                     child: Text("حذف الحساب".tr())),
+    //                                               ],
+    //                                             ))
+    //                                       ],
+    //                                     ),
+    //                                   ),
+    //                                 ],
+    //                               ),
+    //                             ),
+    //                           ],
+    //                         ),
+    //                       );
+    //                     }
+    //   ),
+    //             );
+    //
+    //
+    //       }),
+    // );
 
   }
    // // return BlocConsumer<HomeCubit, HomeState>(

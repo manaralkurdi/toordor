@@ -21,6 +21,7 @@ import 'view/block/cubit/search_cubit.dart';
 import 'view/block/cubit_local/locale_cubit.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
   await Firebase.initializeApp();
   await translator.init(
     localeType: LocalizationDefaultType.asDefined,

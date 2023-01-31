@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "453694739385",
+    "project_id": "toordor",
+    "storage_bucket": "toordor.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:453694739385:android:c0f28d33b469bc0f35dc68",
+        "android_client_info": {
+          "package_name": "com.example.toordor"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "453694739385-ootar7onar45mcutkv4dr772n9q8os4n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCf-G0Zotsi0djcOM2H-WdEhEF06K9LlEE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "453694739385-ootar7onar45mcutkv4dr772n9q8os4n.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

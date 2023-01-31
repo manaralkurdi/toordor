@@ -444,7 +444,7 @@ class _LoginPageState extends State<LoginPage> {
                           InkWell(
                             onTap: (){
                             //  _requestPermission();
-                              signInWithFacebook();
+                           //   signInWithFacebook();
                               // Navigator.pushReplacement(context,
                               //     MaterialPageRoute(builder: (context) => FacebookApp()));
                             },
@@ -470,21 +470,21 @@ class _LoginPageState extends State<LoginPage> {
     print(status);
   }
   String userEmail = "";
-  Future<User?> signInWithFacebook() async {
-    try {
-      final result = (await FacebookAuth.instance.login()).accessToken;
-      print('result: $result');
-      if (result == null) return null;
-      final facebookAuthCredential =
-      FacebookAuthProvider.credential(result.token);
-      final usrCredential =
-          (await _auth.signInWithCredential(facebookAuthCredential)).user;
-      return usrCredential;
-    } catch (e) {
-      print('[FACEBOOK][ERROR: $e]');
-      return null;
-    }
-  }
+  // Future<User?> signInWithFacebook() async {
+  //   try {
+  //     final result = (await FacebookAuth.instance.login()).accessToken;
+  //     print('result: $result');
+  //     if (result == null) return null;
+  //     final facebookAuthCredential =
+  //     FacebookAuthProvider.credential(result.token);
+  //     final usrCredential =
+  //         (await _auth.signInWithCredential(facebookAuthCredential)).user;
+  //     return usrCredential;
+  //   } catch (e) {
+  //     print('[FACEBOOK][ERROR: $e]');
+  //     return null;
+  //   }
+  // }
 
   Map<String, dynamic>? _userData;
   AccessToken? _accessToken;

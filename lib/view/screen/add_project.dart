@@ -7,12 +7,12 @@ import 'package:csc_picker/csc_picker.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:localize_and_translate/localize_and_translate.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
+import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
 
 import 'package:toordor/controller/controller.dart';
 import 'package:toordor/controller/size.dart';
@@ -24,8 +24,7 @@ import 'package:toordor/view/screen/home_page.dart';
 import 'package:toordor/view/screen/my_business.dart';
 import 'package:toordor/view/screen/show_bussnise_appointment.dart';
 import 'package:toordor/view/widget/constant.dart';
-
-import '../widget/image.dart';
+import 'package:toordor/view/widget/image.dart';
 
 class AddProject extends StatefulWidget {
   const AddProject({Key? key}) : super(key: key);
